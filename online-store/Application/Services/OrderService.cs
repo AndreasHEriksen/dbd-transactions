@@ -1,3 +1,4 @@
+using System.Data;
 using online_store.Application.DTOs;
 using online_store.Domain.Interfaces;
 
@@ -24,6 +25,16 @@ public class OrderService
     
     public async Task<bool> PlaceOrderAsync(PlaceOrderDTO orderDto)
     {
-        return false;
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable);
+        try
+        {
+            await _unitOfWork.CommitAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            await _unitOfWork.RollbackAsync();
+            return false;
+        }
     }
 }
